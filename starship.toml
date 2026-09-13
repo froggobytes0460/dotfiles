@@ -1,0 +1,68 @@
+"$schema" = "https://starship.rs/config-schema.json"
+
+add_newline = true
+
+palette = "nord"
+
+format = '''
+[╭────────────────────────────────────────────>](dark_blue)
+([│](dark_blue) $username [@](bold white) $directory $cpp$cmake$python$lua
+)([│](dark_blue) $git_branch $git_commit
+)[╰──── ](dark_blue)$character
+'''
+
+[character]
+success_symbol = "[❯](cyan)"
+error_symbol = "[❯](red)"
+
+[line_break]
+disabled = false
+
+[username]
+show_always = true
+format = "[$user]($style)"
+
+[git_branch]
+style = "bold purple"
+format = "[on](cyan) [$symbol$branch(:$remote_branch)]($style) "
+
+[python]
+symbol = "\uec39 "
+
+style = "bold blue"
+format = "[$symbol$version]($style) "
+
+generic_venv_names = [".venv", "venv"]
+
+[cmake]
+symbol = "\ue794 "
+style = "bold blue"
+format = "[$symbol$version]($style) "
+
+detect_files = ["CMakeLists.txt", "Makefile", "*.cpp", "*.cc", "*.cxx", "*.hpp", "*.hxx"]
+detect_folders = ["src", "lib", "include", "cpp", "cxx", "src-cpp"]
+
+version_format = "v${raw}"
+
+[lua]
+symbol = "\ue826 "
+style = "bold blue"
+format = "[$symbol($version)]($style) "
+
+[palettes.nord]
+bg = "#2e3440"
+dark_gray = "#3b4252"
+mid_gray = "#434c5e"
+light_gray = "#4c566a"
+text = "#d8dee9"
+light_text = "#e5e9f0"
+white = "#eceff4"
+teal = "#8fbcbb"
+cyan = "#88c0d0"
+blue = "#81a1c1"
+dark_blue = "#5e81ac"
+red = "#bf616a"
+orange = "#d08770"
+yellow = "#ebcb8b"
+green = "#a3be8c"
+purple = "#b48ead"

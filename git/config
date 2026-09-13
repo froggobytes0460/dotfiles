@@ -1,0 +1,37 @@
+# Documentation: https://git-scm.com/docs/git-config
+
+[alias]
+  co = checkout
+  br = branch
+  ci = commit
+  st = status
+
+[init]
+  templateDir = /Users/zeba/.git-template
+  defaultBranch = main
+
+[pull]
+  rebase = true
+
+[push]
+  autoSetupRemote = true
+
+[commit]
+  verbose = true
+
+[column]
+  ui = auto
+
+[branch]
+  sort = -committerdate
+
+[tag]
+  sort = -version:refname
+
+[rerere]
+  enabled = true
+  autoupdate = true
+
+[user]
+  name = Yasir Atiq Mohammed
+  email = yasiratiqmohammed@gmail.com

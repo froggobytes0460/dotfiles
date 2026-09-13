@@ -1,0 +1,322 @@
+#!/bin/sh
+# Catppuccin Macchiato — frosted glass edition
+# Bar + pills are a-bit-transparent with heavy blur (see BAR_BG / PILL_BG).
+
+# Icons
+APPLE_ICON="$(printf '\356\234\221')"
+
+# ── palette (opaque) ──
+SURFACE1=0xFF4c566a
+OVERLAY0=0xFF4c566a
+OVERLAY1=0xFF81a1c1
+TEXT=0xFFeceff4
+SUBTEXT0=0xFFd8dee9
+LAVENDER=0xFF81a1c1
+SKY=0xFF88c0d0
+YELLOW=0xFF5e81ac
+MAUVE=0xFFb48ead
+
+# ── theme: neutrals + sky + sun-gold (matches wallpaper) ──
+# All status icons use SKY (tonal with the blue sky); warm YELLOW is reserved
+# for active/playing/charging states; RED is alerts-only (battery low,
+# temp critical). Labels stay neutral TEXT.
+
+# ── frosted / transparent ──
+# ARGB alpha: B3 ≈ 70% opaque, BF ≈ 75% opaque, 80 ≈ 50%
+PILL_BG=0xBF2e3440      # base, glassy but readable
+PILL_BORDER=0x804c566a  # surface1 @ 50%, soft outline
+TRANSPARENT=0x00000000
+
+# main bar: fully transparent, no rectangle — only the pills show.
+# (blur lives on the pills themselves, so the bar stays invisible)
+sketchybar --bar height=32        \
+                 margin=0         \
+                 y_offset=4       \
+                 corner_radius=0  \
+                 border_width=0   \
+                 color=$TRANSPARENT \
+                 blur_radius=0    \
+                 shadow=off       \
+                 sticky=on        \
+                 font_smoothing=on \
+                 padding_left=12  \
+                 padding_right=12 \
+                 drawing=on
+
+sketchybar --default updates=when_shown                             \
+                     icon.font="JetBrainsMono Nerd Font Mono:Normal:16.0"  \
+                     icon.color=$SUBTEXT0                           \
+                     icon.highlight_color=$LAVENDER                 \
+                     label.font="JetBrainsMono Nerd Font Mono:Normal:14.0" \
+                     label.color=$TEXT                              \
+                     background.color=$TRANSPARENT                  \
+                     y_offset=0
+
+# ~~ left items ~~
+
+# apple logo leading the workspace pill (inspiration SS)
+# click opens Activity Monitor
+sketchybar --add item apple left \
+           --set apple icon="$APPLE_ICON" \
+                       icon.font="JetBrainsMono Nerd Font Mono:Normal:17.0" \
+                       icon.color=$TEXT \
+                       icon.align=center \
+                       icon.width=30 \
+                       icon.padding_left=4 \
+                       icon.padding_right=2 \
+                       icon.y_offset=1 \
+                       label.drawing=off \
+                       background.drawing=off \
+                       click_script="open -a 'Activity Monitor'"
+
+sketchybar --add item apple_sep left \
+           --set apple_sep icon.drawing=off \
+                               background.drawing=off \
+                               label="|" \
+                               label.color=$SURFACE1 \
+                               label.padding_left=2 \
+                               label.padding_right=8
+
+# space numbers (spares for nonexistent spaces auto-hide, so keep a few
+# extra for the + button to grow into; numbers only, no glyphs)
+SPACE_ICONS=("1" "2" "3" "4" "5" "6" "7" "8" "9" "10" "11" "12" "13")
+SPACES=()
+
+for i in "${!SPACE_ICONS[@]}"
+do
+  sid=$(($i+1))
+  SPACES+=(space.$sid)
+  sketchybar --add space space.$sid left \
+             --set space.$sid associated_space=$sid \
+                              icon=${SPACE_ICONS[i]} \
+                              icon.color=$OVERLAY1 \
+                              icon.align=center \
+                              icon.width=30 \
+                              label.drawing=off \
+                              background.drawing=off \
+                              background.color=$MAUVE \
+                              background.height=22 \
+                              background.corner_radius=7 \
+                              script='./scripts/space.sh' \
+                              click_script="yabai -m space --focus $sid"
+done
+
+# separator + add-space button: a plain + so it never reads as a workspace
+sketchybar --add item space_sep left \
+           --set      space_sep label="|" \
+                                 label.color=$SURFACE1 \
+                                 icon.drawing=off \
+                                 background.drawing=off \
+                                 label.padding_left=2 \
+                                 label.padding_right=2
+
+sketchybar --add item new_space left                        \
+           --set      new_space icon.width=24               \
+                                label.drawing=off          \
+                                icon.align=center           \
+                                icon.padding_right=0        \
+                                 icon.color=$SUBTEXT0 \
+                                 icon="+"                    \
+                                 background.drawing=off     \
+                                 click_script='./scripts/new_space.sh'
+
+# consolidate space numbers and add a frosted background
+# (background.padding_* expands the pill outward = inner breathing room)
+sketchybar --add bracket spaces apple apple_sep '/space\..*/' space_sep new_space     \
+           --set         spaces background.color=$PILL_BG               \
+                                background.padding_left=10 \
+                                background.padding_right=10 \
+                                background.corner_radius=12             \
+                                background.border_width=1              \
+                                background.border_color=$PILL_BORDER   \
+                                background.height=30                   \
+                                blur_radius=30
+
+# breathing room between the workspace pill and the now-playing pill
+# (a fixed-width invisible spacer: background.padding only grows pills,
+# it never pushes neighbors apart)
+sketchybar --add item gap_workspaces_music left \
+           --set      gap_workspaces_music width=12 \
+                                           background.drawing=off \
+                                           icon.drawing=off \
+                                           label.drawing=off
+
+# now playing (left, right after the workspace cluster)
+sketchybar --add event now_playing_change \
+           --add item now_playing left \
+           --set now_playing script='./scripts/now_playing.sh' \
+                                update_freq=2 \
+                                scroll_texts=off \
+                                drawing=on \
+                                label="Play Something" \
+                                 icon="$(printf '\357\200\201')" \
+                                 icon.color=$YELLOW \
+                                icon.padding_left=12 \
+                                icon.padding_right=8 \
+                                label.color=$TEXT \
+                                label.padding_left=4 \
+                                 label.max_chars=25 \
+                                 label.padding_right=14 \
+                                label.scroll_duration=500 \
+                                background.drawing=off \
+           --subscribe now_playing now_playing_change
+
+# now playing transport buttons (icon only, event driven with no polling;
+# the main item's `sync` tick fans out to them, so they still converge)
+sketchybar --add item now_playing.sep left \
+           --set now_playing.sep script='./scripts/now_playing.sh' \
+                                      label="|" \
+                                     label.color=$OVERLAY0 \
+                                     icon.drawing=off \
+                                     background.drawing=off \
+           --subscribe now_playing.sep now_playing_change
+
+sketchybar --add item now_playing.prev left \
+           --set now_playing.prev script='./scripts/now_playing.sh' \
+                                      click_script='./scripts/now_playing.sh' \
+                                      label.drawing=off \
+                                      icon.color=$SUBTEXT0 \
+                                      icon.padding_left=8 \
+                                      icon.padding_right=8 \
+                                      background.drawing=off \
+           --subscribe now_playing.prev now_playing_change mouse.clicked
+
+sketchybar --add item now_playing.toggle left \
+           --set now_playing.toggle script='./scripts/now_playing.sh' \
+                                        click_script='./scripts/now_playing.sh' \
+                                        label.drawing=off \
+                                        icon.color=$TEXT \
+                                        icon.padding_left=8 \
+                                        icon.padding_right=8 \
+                                        background.drawing=off \
+           --subscribe now_playing.toggle now_playing_change mouse.clicked
+
+sketchybar --add item now_playing.next left \
+           --set now_playing.next script='./scripts/now_playing.sh' \
+                                      click_script='./scripts/now_playing.sh' \
+                                      label.drawing=off \
+                                      icon.color=$SUBTEXT0 \
+                                      icon.padding_left=8 \
+                                      icon.padding_right=8 \
+                                      background.drawing=off \
+           --subscribe now_playing.next now_playing_change mouse.clicked
+
+# one frosted pill for the track plus its buttons (standard bracket grouping)
+sketchybar --add bracket now_playing_bracket now_playing now_playing.sep now_playing.prev now_playing.toggle now_playing.next \
+           --set now_playing_bracket background.drawing=on \
+                                        background.color=$PILL_BG \
+                                        background.corner_radius=12 \
+                                        background.height=30 \
+                                        background.border_width=1 \
+                                        background.border_color=$PILL_BORDER \
+                                       background.padding_left=4 \
+                                       background.padding_right=4 \
+                                       blur_radius=30
+
+# update defaults for right-side frosted pills
+sketchybar --default                                               \
+                     background.color=$PILL_BG                     \
+                     background.corner_radius=12                   \
+                     background.height=30                          \
+                     background.border_width=1                     \
+                     background.border_color=$PILL_BORDER          \
+                     blur_radius=30                                \
+                     icon.color=$TEXT                              \
+                     label.color=$TEXT                             \
+                     icon.padding_left=12                          \
+                     icon.padding_right=5                          \
+                     label.padding_left=5                          \
+                     label.padding_right=15                        \
+                     background.padding_left=6                     \
+                     background.padding_right=6
+
+# The daemon is managed by launchd (see
+# ~/Library/LaunchAgents/local.sketchybar-now-playing.plist), so there is
+# deliberately no autostart line here: reloads must never spawn daemons.
+
+# ~~ center items ~~
+
+# app title
+sketchybar --add event title_change
+sketchybar --add item title center                                  \
+           --set      title label.padding_left=12                   \
+                            label="Title"                           \
+                            background.padding_left=0               \
+                            icon.padding_left=0                     \
+                            icon.padding_right=0                    \
+                            script='./scripts/title.sh'             \
+                            background.border_color=$PILL_BORDER    \
+                            label.max_chars=54                      \
+
+sketchybar --subscribe title title_change front_app_switched window_focus
+
+yabai -m signal --list | grep -q '"event":"window_title_changed"' || \
+    yabai -m signal --add event=window_title_changed action="sketchybar --trigger title_change"
+yabai -m signal --list | grep -q '"event":"window_focused"' || \
+    yabai -m signal --add event=window_focused action="sketchybar --trigger title_change"
+
+
+# ~~ right items ~~
+
+# battery
+sketchybar --add item battery right                                 \
+           --set      battery icon=                                 \
+                              icon.color=$SKY                       \
+                              label="--%"                           \
+                              script='./scripts/battery.sh'         \
+                              update_freq=60
+
+
+# time
+sketchybar --add item time right                                    \
+           --set      time icon=􀐬                                   \
+                           icon.color=$SKY                          \
+                           label="$(date '+%I:%M %p')"              \
+                           script='./scripts/time.sh'               \
+                           update_freq=10
+
+# date
+sketchybar --add item date right                                    \
+           --set      date icon=􀧞                                   \
+                           icon.color=$SKY                          \
+                           label="$(date '+%a %b %d')"              \
+                            script='./scripts/date.sh'              \
+                            update_freq=1
+
+
+# cpu
+sketchybar --add item cpu right                                    \
+           --set      cpu icon.color=$SKY                          \
+                           script='./scripts/cpu.sh'               \
+                           update_freq=5
+
+
+# memory
+sketchybar --add item memory right                                 \
+           --set      memory icon.color=$SKY                       \
+                           script='./scripts/memory.sh'            \
+                           update_freq=5
+
+
+
+# cpu temp (mean across CPU die banks via mac-temp, no sudo)
+sketchybar --add item temp right                                   \
+           --set      temp icon=󰔏                                  \
+                            icon.color=$SKY                        \
+                           script='./scripts/temps.sh'             \
+                           update_freq=10
+
+
+# # weather
+sketchybar --add item weather right                                 \
+           --set      weather icon=A                                \
+                              icon.color=$SKY                       \
+                              label="--°F"                          \
+                              script='./scripts/weather.sh'         \
+                              update_freq=10
+
+
+
+# finish config
+sketchybar --update
+sketchybar --hotload on

@@ -1,0 +1,85 @@
+.blacklist [
+  "Brave"
+]
+
+# app launch
+cmd - return : /Applications/Ghostty.app/Contents/MacOS/ghostty
+cmd + shift - return : '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser'
+cmd + alt + shift - return : '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser' --incognito
+
+# focus window
+alt - h : yabai -m window --focus west
+alt - j : yabai -m window --focus south
+alt - k : yabai -m window --focus north
+alt - l : yabai -m window --focus east
+
+# swap window
+shift + alt - h : yabai -m window --swap west
+shift + alt - j : yabai -m window --swap south
+shift + alt - k : yabai -m window --swap north
+shift + alt - l : yabai -m window --swap east
+
+# move window to display
+ctrl + alt - h : yabai -m window --display west; yabai -m display --focus west
+ctrl + alt - l : yabai -m window --display east; yabai -m display --focus east
+
+# resize window
+alt - left  : yabai -m window --resize left:-40:0
+alt - right : yabai -m window --resize right:40:0
+alt - down  : yabai -m window --resize bottom:0:40
+alt - up    : yabai -m window --resize top:0:-40
+
+# rotate / flip / balance
+alt - r : yabai -m space --rotate 90
+shift + alt - x : yabai -m window --toggle split
+shift + alt - y : yabai -m space --mirror y-axis
+shift + alt - z : yabai -m space --mirror x-axis
+alt - e : yabai -m space --balance
+
+# float / fullscreen toggle
+alt - t : yabai -m window --toggle float --grid 4:4:1:1:2:2
+alt - f : yabai -m window --toggle zoom-fullscreen
+shift + alt - f : yabai -m window --toggle native-fullscreen
+
+# stack windows
+shift + alt - s : yabai -m window --stack next
+alt - n : yabai -m window --focus stack.next
+alt - p : yabai -m window --focus stack.prev
+
+# layout
+ctrl + alt - b : yabai -m space --layout bsp
+ctrl + alt - s : yabai -m space --layout stack
+ctrl + alt - f : yabai -m space --layout float
+
+# space switch (1-9)
+alt - 1 : yabai -m space --focus 1
+alt - 2 : yabai -m space --focus 2
+alt - 3 : yabai -m space --focus 3
+alt - 4 : yabai -m space --focus 4
+alt - 5 : yabai -m space --focus 5
+alt - 6 : yabai -m space --focus 6
+alt - 7 : yabai -m space --focus 7
+alt - 8 : yabai -m space --focus 8
+alt - 9 : yabai -m space --focus 9
+
+# move window to space (1-9)
+shift + alt - 1 : yabai -m window --space 1
+shift + alt - 2 : yabai -m window --space 2
+shift + alt - 3 : yabai -m window --space 3
+shift + alt - 4 : yabai -m window --space 4
+shift + alt - 5 : yabai -m window --space 5
+shift + alt - 6 : yabai -m window --space 6
+shift + alt - 7 : yabai -m window --space 7
+shift + alt - 8 : yabai -m window --space 8
+shift + alt - 9 : yabai -m window --space 9
+
+# space create/destroy/nav
+cmd + alt - n : yabai -m space --create
+cmd + alt - w : yabai -m space --destroy
+cmd + alt - left  : yabai -m space --focus prev
+cmd + alt - right : yabai -m space --focus next
+
+# yabai service
+ctrl + alt - r : yabai --restart-service
+alt - v : CONFIG_DIR=$HOME/.config/sketchybar $HOME/.config/sketchybar/plugins/clipboard_choose.sh
+alt - p : CONFIG_DIR=$HOME/.config/sketchybar $HOME/.config/sketchybar/plugins/prompts.sh
